@@ -45,7 +45,7 @@
   with_items:
   - /var/oozie
   - /var/oozie/deploy
-  - /var/oozie/status
+  - /var/oozie/.status
   tags:
   - cdh5-oozie
 
@@ -60,7 +60,7 @@
 - name: create database for oozie
   shell: creates={{ item }} mysql -uroot -p'{{ hive_mysql_passwd }}' < /var/oozie/deploy/oozie_db_init.sql && touch {{ item }}
   with_items:
-  - /var/oozie/status/oozie_db.created
+  - /var/oozie/.status/oozie_db.created
   tags:
   - cdh5-oozie
   - cdh5-oozie-db
@@ -80,7 +80,7 @@
 - name: create directories in hdfs
   shell: creates={{ item }} sudo -u hdfs hadoop fs -mkdir -p /user/oozie; sudo -u hdfs hadoop fs -chown -R oozie /user/oozie && touch {{ item }}
   with_items:
-  - /var/oozie/status/oozie_dir.created
+  - /var/oozie/.status/oozie_dir.created
   tags:
   - cdh5-oozie
   - cdh5-oozie-lib
@@ -88,7 +88,7 @@
 - name: create sharelib for oozie in hdfs
   shell: creates={{ item }} sudo oozie-setup sharelib create -fs hdfs://{{ nameservice_id }}:8020 -locallib /usr/lib/oozie/oozie-sharelib-yarn.tar.gz && touch {{ item }}
   with_items:
-  - /var/oozie/status/sharelib.created
+  - /var/oozie/.status/sharelib.created
   tags:
   - cdh5-oozie
   - cdh5-oozie-lib

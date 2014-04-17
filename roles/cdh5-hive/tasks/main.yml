@@ -58,7 +58,7 @@
   with_items:
   - /var/hive
   - /var/hive/deploy
-  - /var/hive/status
+  - /var/hive/.status
   tags:
   - cdh5-hive
 
@@ -74,7 +74,7 @@
 - name: set the password for mysql root user
   shell: creates={{ item }} mysqladmin -u root password '{{ hive_mysql_passwd }}' && touch {{ item }}
   with_items:
-  - /var/hive/status/password.reset
+  - /var/hive/.status/password.reset
   tags:
   - cdh5-hive
   - cdh5-hive-mysqlserver
@@ -82,7 +82,7 @@
 - name: create the database for hive metastore
   shell: creates={{ item }} mysql -uroot -p'{{ hive_mysql_passwd }}' < /var/hive/deploy/hive_metastore_init.sql && touch {{ item }}
   with_items:
-  - /var/hive/status/metastore.created
+  - /var/hive/.status/metastore.created
   tags:
   - cdh5-hive
   - cdh5-hive-mysqlserver
@@ -95,7 +95,7 @@
 - name: create warehouse directory
   shell: creates={{ item }} sudo -u hdfs hadoop fs -mkdir -p /user/hive/warehouse; sudo -u hdfs hadoop fs -chown -R hive /user/hive; sudo -u hdfs hadoop fs -chmod -R 1777 /user/hive && touch {{ item }}
   with_items:
-  - /var/hive/status/warehouse.created
+  - /var/hive/.status/warehouse.created
   tags:
   - cdh5-hive
 
