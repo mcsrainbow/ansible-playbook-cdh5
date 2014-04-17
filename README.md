@@ -1,6 +1,6 @@
 ansible-playbooks-cdh5
 =========
-Namenodes,HBase,Hive,HTTPFS,Oozie,Pig,Zookeeper,Spark <br />
+HDFS,HBase,Hive,HTTPFS,Oozie,Pig,Zookeeper,Spark <br />
 <br />
 Steps:<br />
 ------------------
