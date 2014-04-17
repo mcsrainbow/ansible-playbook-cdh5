@@ -1,0 +1,33 @@
+---
+- name: install zookeeper server pkgs
+  yum: name={{ item }}-{{ version['zookeeper'] }} state=present
+  with_items:
+  - zookeeper-server
+  tags:
+  - cdh5-zookeeper
+  - cdh5-zookeeperserver
+
+- name: create zookeeper_datadir
+  file: path={{ zookeeper_datadir }} state=directory owner=zookeeper group=zookeeper mode=0755
+  tags:
+  - cdh5-zookeeper
+  - cdh5-zookeeperserver
+
+- name: init zookeeper server
+  shell: service zookeeper-server init --myid={{ zoo_id }}  creates={{ zookeeper_datadir }}/myid
+  tags:
+  - cdh5-zookeeper
+  - cdh5-zookeeperserver
+
+- name: create zookeeper cfg
+  template: src=zoo.cfg.j2 dest=/etc/zookeeper/conf/zoo.cfg owner=zookeeper group=zookeeper mode=0644
+  notify: restart zookeeper server
+  tags:
+  - cdh5-zookeeper
+  - cdh5-zookeeperserver
+
+- name: start zookeeper server
+  service: name=zookeeper-server state=started
+  tags:
+  - cdh5-zookeeper
+  - cdh5-zookeeperserver

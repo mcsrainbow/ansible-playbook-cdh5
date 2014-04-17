@@ -1,0 +1,82 @@
+---
+version:
+  hadoop: 2.2.0+cdh5.0.0+1610-0.cdh5b2.p0.51.el6
+  lzo: 0.4.15+gplextras5.0.0+0-0.gplextras5b2.p0.28.el6
+  hbase: 0.96.1.1+cdh5.0.0+23-0.cdh5b2.p0.20.el6
+  hive: 0.12.0+cdh5.0.0+265-0.cdh5b2.p0.33.el6
+  oozie: 4.0.0+cdh5.0.0+144-0.cdh5b2.p0.21.el6
+  pig: 0.12.0+cdh5.0.0+20-0.cdh5b2.p0.19.el6
+  zookeeper: 3.4.5+cdh5.0.0+27-0.cdh5b2.p0.29.el6
+  spark: 0.9.0-1.cdh5b2.p0.22.el6
+
+ansible_path: "{{ lookup('env','ANSIBLE_WORK_DIR') }}"
+repo_server: 10.100.1.10
+
+tl_domain: heylinux.com
+
+# core-site_xml
+nameservice_id: mycluster
+fs_trash_interval: 1440
+
+# zoo_cfg
+zookeeper_datadir: /var/lib/zookeeper
+
+# hdfs-site_xml
+dfs_permissions_superusergroup: hdfs
+dfs_permissions_enabled: 'false'
+dfs_replication: 1
+dfs_journalnode_edits_dir: /var/hadoop/data/1/dfs/jn
+dfs_blocksize: 134217728
+dfs_namenode_handler_count: 256
+dfs_datanode_handler_count: 32
+dfs_datanode_du_reserved: 0
+dfs_balance_bandwidthPerSec: 1048576
+dfs_hosts_exclude: /etc/hadoop/conf.{{ nameservice_id }}/datanodes.exclude
+dfs_datanode_max_transfer_threads: 4096
+dfs_datanode_balanced_space_threshold: 10737418240
+dfs_datanode_balanced_space_preference_fraction: 0.75
+dfs_datanode_max_xcievers: 4096
+dfs_checksum_type: CRC32
+dfs_namenode_name_dir:
+  - /var/hadoop/data/1/dfs/nn
+  - /var/hadoop/data/2/dfs/nn
+dfs_datanode_data_dir:
+  - /var/hadoop/data/1/dfs/dn
+  - /var/hadoop/data/2/dfs/dn
+  - /var/hadoop/data/3/dfs/dn
+  - /var/hadoop/data/4/dfs/dn
+
+# yarn-site_xml
+yarn_nodemanager_local_dirs:
+  - /var/hadoop/data/1/yarn/local
+  - /var/hadoop/data/2/yarn/local
+  - /var/hadoop/data/3/yarn/local
+  - /var/hadoop/data/4/yarn/local
+yarn_nodemanager_log_dirs:
+  - /var/hadoop/data/1/yarn/logs
+  - /var/hadoop/data/2/yarn/logs
+  - /var/hadoop/data/3/yarn/logs
+  - /var/hadoop/data/4/yarn/logs
+yarn_nodemanager_remote_app_log_dir: 'hdfs://{{ nameservice_id }}/var/log/hadoop-yarn/apps'
+yarn_nodemanager_vmem_pmem_ratio: 10
+yarn_nodemanager_resource_memory_mb: 24576
+yarn_nodemanager_pmem_check_enabled: 'true'
+yarn_nodemanager_vmem_check_enabled: 'true'
+
+# mapred-site_xml
+mapreduce_map_memory_mb: 4096
+mapreduce_reduce_memory_mb: 8192
+mapreduce_map_java_opts: '-Xmx3072m'
+mapreduce_reduce_java_opts: '-Xmx6144m'
+mapreduce_jobtracker_handler_count: 128
+dfs_namenode_handler_count: 128
+
+# hive-site_xml
+hive_mysql_hosts:
+  - "%"
+  - "127.0.0.1"
+  - "localhost"
+hive_mysql_passwd: mypasswd
+
+# oozie-site_xml
+oozie_db_passwd: mypasswd

@@ -1,0 +1,7 @@
+---
+- name: start spark worker services
+  service: name={{ item }} state=started
+  with_items:
+  - spark-worker
+  tags:
+  - cdh5-spark-worker

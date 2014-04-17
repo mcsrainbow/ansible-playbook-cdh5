@@ -1,0 +1,16 @@
+---
+- name: install hbase regionserver pkgs
+  yum: name={{ item }}-{{ version['hbase'] }} state=present
+  with_items:
+  - hbase-regionserver
+  tags:
+  - cdh5-hbase
+  - cdh5-hbase-regionserver
+
+- name: start hbase regionserver
+  service: name={{ item }} state=started
+  with_items:
+  - hbase-regionserver
+  tags:
+  - cdh5-hbase
+  - cdh5-hbase-regionserver

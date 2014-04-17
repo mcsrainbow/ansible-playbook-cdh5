@@ -1,0 +1,12 @@
+---
+- name: installl httpfs pkgs
+  yum: name={{ item }}-{{ version['hadoop'] }} state=present
+  with_items:
+  - hadoop-httpfs
+  tags:
+  - cdh5-httpfs
+
+- name: start httpfs service
+  service: name=hadoop-httpfs state=started
+  tags:
+  - cdh5-httpfs

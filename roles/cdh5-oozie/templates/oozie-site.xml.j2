@@ -1,0 +1,227 @@
+<?xml version="1.0"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one
+  or more contributor license agreements.  See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership.  The ASF licenses this file
+  to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License.  You may obtain a copy of the License at
+  
+       http://www.apache.org/licenses/LICENSE-2.0
+  
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<configuration>
+
+    <!--
+        Refer to the oozie-default.xml file for the complete list of
+        Oozie configuration properties and their default values.
+    -->
+
+    <property>
+        <name>oozie.service.ActionService.executor.ext.classes</name>
+        <value>
+            org.apache.oozie.action.email.EmailActionExecutor,
+            org.apache.oozie.action.hadoop.HiveActionExecutor,
+            org.apache.oozie.action.hadoop.ShellActionExecutor,
+            org.apache.oozie.action.hadoop.SqoopActionExecutor,
+            org.apache.oozie.action.hadoop.DistcpActionExecutor
+        </value>
+    </property>
+
+    <property>
+        <name>oozie.service.SchemaService.wf.ext.schemas</name>
+        <value>
+            shell-action-0.1.xsd,shell-action-0.2.xsd,shell-action-0.3.xsd,email-action-0.1.xsd,hive-action-0.2.xsd,
+            hive-action-0.3.xsd,hive-action-0.4.xsd,hive-action-0.5.xsd,sqoop-action-0.2.xsd,sqoop-action-0.3.xsd,
+            sqoop-action-0.4.xsd,ssh-action-0.1.xsd,ssh-action-0.2.xsd,distcp-action-0.1.xsd,distcp-action-0.2.xsd,
+            oozie-sla-0.1.xsd,oozie-sla-0.2.xsd
+        </value>
+    </property>
+
+    <property>
+        <name>oozie.system.id</name>
+        <value>oozie-${user.name}</value>
+    </property>
+
+    <property>
+        <name>oozie.systemmode</name>
+        <value>NORMAL</value>
+    </property>
+    <property>
+        <name>oozie.service.AuthorizationService.security.enabled</name>
+        <value>false</value>
+    </property>
+
+    <property>
+        <name>oozie.service.PurgeService.older.than</name>
+        <value>30</value>
+    </property>
+    <property>
+        <name>oozie.service.PurgeService.purge.interval</name>
+        <value>3600</value>
+    </property>
+    <property>
+        <name>oozie.service.CallableQueueService.queue.size</name>
+        <value>10000</value>
+    </property>
+    <property>
+        <name>oozie.service.CallableQueueService.threads</name>
+        <value>10</value>
+    </property>
+    <property>
+        <name>oozie.service.CallableQueueService.callable.concurrency</name>
+        <value>3</value>
+    </property>
+    <property>
+        <name>oozie.service.coord.normal.default.timeout
+        </name>
+	<value>120</value>
+    </property>
+
+    <property>
+        <name>oozie.db.schema.name</name>
+        <value>oozie</value>
+    </property>
+    <property>
+        <name>oozie.service.JPAService.create.db.schema</name>
+        <value>true</value>
+    </property>
+
+    <property>
+        <name>oozie.service.JPAService.jdbc.driver</name>
+        <value>com.mysql.jdbc.Driver</value>
+    </property>
+    <property>
+        <name>oozie.service.JPAService.jdbc.url</name>
+        <value>jdbc:mysql://localhost:3306/oozie</value>
+    </property>
+    <property>
+        <name>oozie.service.JPAService.jdbc.username</name>
+        <value>oozie</value>
+    </property>
+    <property>
+        <name>oozie.service.JPAService.jdbc.password</name>
+        <value>{{ oozie_db_passwd }}</value>
+    </property>
+
+    <property>
+        <name>oozie.service.JPAService.pool.max.active.conn</name>
+        <value>10</value>
+    </property>
+    <property>
+        <name>oozie.service.HadoopAccessorService.kerberos.enabled</name>
+        <value>false</value>
+    </property>
+    <property>
+        <name>local.realm</name>
+        <value>LOCALHOST</value>
+    </property>
+
+    <property>
+        <name>oozie.service.HadoopAccessorService.keytab.file</name>
+        <value>${user.home}/oozie.keytab</value>
+    </property>
+    <property>
+        <name>oozie.service.HadoopAccessorService.kerberos.principal</name>
+        <value>${user.name}/localhost@${local.realm}</value>
+    </property>
+    <property>
+        <name>oozie.service.HadoopAccessorService.jobTracker.whitelist</name>
+        <value> </value>
+    </property>
+    <property>
+        <name>oozie.service.HadoopAccessorService.nameNode.whitelist</name>
+        <value> </value>
+    </property>
+
+    <property>
+        <name>oozie.service.HadoopAccessorService.hadoop.configurations</name>
+        <value>*=/etc/hadoop/conf</value>
+    </property>
+    <property>
+        <name>oozie.service.WorkflowAppService.system.libpath</name>
+        <value>/user/${user.name}/share/lib</value>
+    </property>
+
+    <property>
+        <name>use.system.libpath.for.mapreduce.and.pig.jobs</name>
+        <value>false</value>
+    </property>
+
+    <property>
+        <name>oozie.authentication.type</name>
+        <value>simple</value>
+    </property>
+    <property>
+        <name>oozie.authentication.token.validity</name>
+        <value>36000</value>
+    </property>
+    <property>
+        <name>oozie.authentication.signature.secret</name>
+        <value>oozie</value>
+    </property>
+
+    <property>
+      <name>oozie.authentication.cookie.domain</name>
+      <value></value>
+    </property>
+
+    <property>
+        <name>oozie.authentication.simple.anonymous.allowed</name>
+        <value>true</value>
+    </property>
+
+    <property>
+        <name>oozie.authentication.kerberos.principal</name>
+        <value>HTTP/localhost@${local.realm}</value>
+    </property>
+    <property>
+        <name>oozie.authentication.kerberos.keytab</name>
+        <value>${oozie.service.HadoopAccessorService.keytab.file}</value>
+    </property>
+    <property>
+        <name>oozie.authentication.kerberos.name.rules</name>
+        <value>DEFAULT</value>
+    </property>
+
+    <!-- Proxyuser Configuration -->
+
+    <!--
+
+    <property>
+        <name>oozie.service.ProxyUserService.proxyuser.oozie.hosts</name>
+        <value>*</value>
+    </property>
+    <property>
+        <name>oozie.service.ProxyUserService.proxyuser.oozie.groups</name>
+        <value>*</value>
+    </property>
+
+    -->
+
+    <!-- Default proxyuser configuration for Hue -->
+
+    <property>
+        <name>oozie.service.ProxyUserService.proxyuser.hue.hosts</name>
+        <value>*</value>
+    </property>
+    <property>
+        <name>oozie.service.ProxyUserService.proxyuser.hue.groups</name>
+        <value>*</value>
+    </property>
+
+    <property>
+        <name>oozie.action.mapreduce.uber.jar.enable</name>
+        <value>true</value>
+    </property>
+    <property>
+        <name>oozie.service.HadoopAccessorService.supported.filesystems</name>
+        <value>hdfs,viewfs</value>
+    </property>
+</configuration>

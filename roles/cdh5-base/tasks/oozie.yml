@@ -1,0 +1,32 @@
+---
+- name: create oozie group
+  group: name=oozie state=present
+  tags:
+  - cdh5-base
+  - cdh5-oozie
+  - cdh5-oozie-user
+  
+- name: create oozie user
+  user: name=oozie group=oozie createhome=yes state=present
+  tags:
+  - cdh5-base
+  - cdh5-oozie
+  - cdh5-oozie-user
+
+- name: create .ssh directory for oozie user
+  file: path=/home/oozie/.ssh state=directory owner=oozie group=oozie mode=0700
+  tags:
+  - cdh5-base
+  - cdh5-oozie
+  - cdh5-oozie-user
+
+- name: copy the sshkeys for oozie user
+  copy: src=oozie/sshkeys/{{ item }} dest=/home/oozie/.ssh/{{ item }} owner=oozie group=oozie mode=0600
+  with_items:
+  - authorized_keys
+  - id_rsa
+  - id_rsa.pub
+  tags:
+  - cdh5-base
+  - cdh5-oozie
+  - cdh5-oozie-user

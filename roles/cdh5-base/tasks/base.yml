@@ -1,0 +1,154 @@
+---
+- name: create cdh5 repo
+  copy: src={{ item }} dest=/etc/yum.repos.d/{{ item }} owner=root group=root mode=0644
+  with_items:
+  - cloudera-cdh5b2.repo
+  - cloudera-gplextras5b2.repo
+  tags:
+  - cdh5-base
+
+- name: add cdh5 repo key
+  get_url: url=http://archive.cloudera.com/cdh5/redhat/6/x86_64/cdh/RPM-GPG-KEY-cloudera dest=/etc/pki/rpm-gpg/RPM-GPG-KEY-cloudera owner=root group=root mode=0644
+  tags:
+  - cdh5-base
+
+- name: install needed rpms for hadoop
+  yum: name={{ item }} state=present
+  with_items:
+  - gcc
+  - gcc-c++
+  - make
+  tags:
+  - cdh5-base
+
+- name: create the hosts file for all machines
+  template: src=hosts.j2 dest=/etc/hosts owner=root group=root mode=0644
+  tags:
+  - cdh5-base
+  - cdh5-base-hosts
+
+- name: install hadoop base pkgs
+  yum: name={{ item }}-{{ version['hadoop'] }} state=present
+  with_items:
+  - hadoop
+  - hadoop-mapreduce
+  - hadoop-yarn
+  - hadoop-hdfs
+  tags:
+  - cdh5-base
+
+- name: install hadoop lzo pkgs
+  yum: name={{ item }}-{{ version['lzo'] }} state=present
+  with_items:
+  - hadoop-lzo
+  tags:
+  - cdh5-base
+
+- name: create all needed hadoop directories
+  file: path={{ item }} state=directory owner=root group=root mode=0755
+  with_items:
+  - /var/hadoop
+  - /var/hadoop/data
+  - /var/hadoop/.status
+  - /root/deploy
+  - /root/deploy/hadoop
+  tags:
+  - cdh5-base
+
+- name: download jdk-6u35-linux-x64-rpm.bin
+  get_url: url=http://{{ repo_server }}/repo/misc/jdk-6u45-linux-x64-rpm.bin dest=/root/deploy/hadoop/jdk-6u45-linux-x64-rpm.bin mode=0755
+  tags:
+  - cdh5-base
+  - cdh5-jdk
+
+- name: remove openjdk pkgs
+  yum: name={{ item }} state=absent
+  with_items:
+  - java-1.6.0-openjdk-devel
+  - java-1.6.0-openjdk
+  tags:
+  - cdh5-base
+  - cdh5-jdk
+
+- name: run jdk-6u45-linux-x64-rpm.bin
+  shell: /root/deploy/hadoop/jdk-6u45-linux-x64-rpm.bin creates=/usr/java/jdk1.6.0_45
+  tags:
+  - cdh5-base
+  - cdh5-jdk
+
+- name: create java env profile
+  copy: src=java.sh dest=/etc/profile.d/java.sh owner=root group=root mode=0644
+  register: java_env_profile
+  tags:
+  - cdh5-base
+  - cdh5-jdk
+
+- name: source the java env profile
+  shell: source /etc/profile.d/java.sh
+  when: java_env_profile|changed
+  tags:
+  - cdh5-base
+  - cdh5-jdk
+
+- name: install zookeeper base pkgs
+  yum: name={{ item }}-{{ version['zookeeper'] }} state=present
+  with_items:
+  - zookeeper
+  tags:
+  - cdh5-base
+  - cdh5-zookeeper
+
+- name: create zookeeper cfgs
+  template: src=zoo.cfg.j2 dest=/etc/zookeeper/conf/zoo.cfg owner=zookeeper group=zookeeper mode=0644
+  tags:
+  - cdh5-base
+  - cdh5-zookeeper
+
+- name: create /etc/hadoop/conf.{{ nameservice_id }}
+  file: path=/etc/hadoop/conf.{{ nameservice_id }} state=directory owner=root group=root mode=0755
+  register: create_hadoop_conf
+  tags:
+  - cdh5-base
+  - cdh5-base-conf
+
+- name: create alternatives for hadoop-conf
+  shell: alternatives --install /etc/hadoop/conf hadoop-conf {{ item }} 50
+  with_items:
+  - /etc/hadoop/conf.{{ nameservice_id }}
+  when: create_hadoop_conf|changed
+  tags:
+  - cdh5-base
+  - cdh5-base-conf
+
+- name: create alternatives for hadoop-conf
+  shell: alternatives --set hadoop-conf {{ item }} 
+  with_items:
+  - /etc/hadoop/conf.{{ nameservice_id }}
+  when: create_hadoop_conf|changed
+  tags:
+  - cdh5-base
+  - cdh5-base-conf
+
+- name: copy the hadoop configuration files
+  template: src=hadoop/{{ item }}.j2 dest=/etc/hadoop/conf.{{ nameservice_id }}/{{ item }} owner=hdfs group=hadoop mode=0664
+  with_items:
+  - core-site.xml
+  - hdfs-site.xml
+  - mapred-site.xml
+  - yarn-site.xml
+  - yarn-env.sh
+  - slaves
+  - capacity-scheduler.xml
+  - configuration.xsl
+  - container-executor.cfg
+  - hadoop-metrics2.properties
+  - hadoop-metrics.properties
+  - hadoop-policy.xml
+  - log4j.properties
+  - mapred-queues.xml.template
+  - ssl-client.xml.example
+  - ssl-server.xml.example
+  register: copy_hadoop_conf
+  tags:
+  - cdh5-base
+  - cdh5-base-conf

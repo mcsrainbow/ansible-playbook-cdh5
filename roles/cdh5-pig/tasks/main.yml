@@ -1,0 +1,23 @@
+---
+- name: install pig pkgs
+  yum: name={{ item }}-{{ version['pig'] }} state=present
+  with_items:
+  - pig
+  tags:
+  - cdh5-pig
+
+- name:  install datafu pkg
+  yum: name=pig-udf-datafu state=present
+  tags:
+  - cdh5-pig
+
+- name: copy pig configuration files
+  template: src={{ item }}.j2 dest=/etc/pig/conf/{{ item }} owner=root group=root mode=0644
+  with_items:
+  - build.properties
+  - log4j.properties
+  - pig.properties
+  - register.sh
+  tags:
+  - cdh5-pig
+  - cdh5-pig-conf

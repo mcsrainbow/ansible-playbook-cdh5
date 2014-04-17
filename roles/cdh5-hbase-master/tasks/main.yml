@@ -1,0 +1,28 @@
+---
+- name: install hbase master pkgs
+  yum: name={{ item }}-{{ version['hbase'] }} state=present
+  with_items:
+  - hbase-master
+  - hbase-thrift
+  - hbase-rest
+  tags:
+  - cdh5-hbase
+  - cdh5-hbase-master
+
+- name: create hbase directory in hdfs
+  shell: creates={{ item }} sudo -u hdfs hadoop fs -mkdir -p /hbase; sudo -u hdfs hadoop fs -chown hbase /hbase && touch {{ item }}
+  with_items:
+  - /var/hadoop/.status/hbase_dir.created
+  tags:
+  - cdh5-hbase
+  - cdh5-hbase-master
+
+- name: start hbase master services
+  service: name={{ item }} state=started
+  with_items:
+  - hbase-master
+  - hbase-thrift
+  - hbase-rest
+  tags:
+  - cdh5-hbase
+  - cdh5-hbase-master

@@ -1,0 +1,113 @@
+---
+- name: install hive server pkgs
+  yum: name={{ item }}-{{ version['hive'] }} state=present
+  with_items:
+  - hive
+  - hive-metastore
+  - hive-server2
+  - hive-hbase
+  - hive-jdbc
+  tags:
+  - cdh5-hive
+
+- name: copy the hive configuration files
+  template: src={{ item }}.j2 dest=/etc/hive/conf/{{ item }} owner=hive group=hive mode=0664
+  with_items:
+  - hive-site.xml
+  - hive-env.sh.template
+  - hive-default.xml.template
+  - hive-exec-log4j.properties
+  - hive-log4j.properties
+  - hive-server2
+  register: copy_hive_conf
+  tags:
+  - cdh5-hive
+  - cdh5-hive-conf
+
+- name: copy the hive default env conf
+  template: src={{ item }}.j2 dest=/etc/default/{{ item }} owner=hive group=hive mode=0644
+  with_items:
+  - hive-server2
+  tags:
+  - cdh5-hive
+  - cdh5-hive-conf
+
+- name: install mysql server and connector for hive metastore
+  yum: name={{ item }} state=present
+  with_items:
+  - mysql-server
+  - mysql-connector-java
+  tags:
+  - cdh5-hive
+  - cdh5-hive-mysqlserver
+
+- name: start mysql server for hive metastore
+  service: name=mysqld state=started
+  tags:
+  - cdh5-hive
+  - cdh5-hive-mysqlserver
+
+- name: create symbolically link for mysql connector
+  file: src=/usr/share/java/mysql-connector-java.jar dest=/usr/lib/hive/lib/mysql-connector-java.jar owner=hive group=hive state=link
+  tags:
+  - cdh5-hive
+  - cdh5-hive-mysqlserver
+
+- name: create needed directories for hive
+  file: name={{ item }} state=directory owner=hive group=hive mode=0700
+  with_items:
+  - /var/hive
+  - /var/hive/deploy
+  - /var/hive/status
+  tags:
+  - cdh5-hive
+
+- name: copy hive_metastore_init.sql to /var/hive/deploy
+  template: src={{ item }}.j2 dest=/var/hive/deploy/{{ item }} owner=hive group=hive mode=0644
+  with_items:
+  - hive_metastore_init.sql
+  tags:
+  - cdh5-hive
+  - cdh5-hive-conf
+  - cdh5-hive-mysqlserver
+
+- name: set the password for mysql root user
+  shell: creates={{ item }} mysqladmin -u root password '{{ hive_mysql_passwd }}' && touch {{ item }}
+  with_items:
+  - /var/hive/status/password.reset
+  tags:
+  - cdh5-hive
+  - cdh5-hive-mysqlserver
+
+- name: create the database for hive metastore
+  shell: creates={{ item }} mysql -uroot -p'{{ hive_mysql_passwd }}' < /var/hive/deploy/hive_metastore_init.sql && touch {{ item }}
+  with_items:
+  - /var/hive/status/metastore.created
+  tags:
+  - cdh5-hive
+  - cdh5-hive-mysqlserver
+
+- name: start metastore service
+  service: name=hive-metastore state=started
+  tags:
+  - cdh5-hive
+
+- name: create warehouse directory
+  shell: creates={{ item }} sudo -u hdfs hadoop fs -mkdir -p /user/hive/warehouse; sudo -u hdfs hadoop fs -chown -R hive /user/hive; sudo -u hdfs hadoop fs -chmod -R 1777 /user/hive && touch {{ item }}
+  with_items:
+  - /var/hive/status/warehouse.created
+  tags:
+  - cdh5-hive
+
+- name: change the permissions of .hivehistory
+  file: path=/var/lib/hive/.hivehistory owner=hive group=hive mode=0666
+  tags:
+  - cdh5-hive
+
+- name: start hive server services
+  service: name={{ item }} state=started
+  with_items:
+  - hive-server2
+  tags:
+  - cdh5-hive
+  - cdh5-hive-server2

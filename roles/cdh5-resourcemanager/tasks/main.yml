@@ -1,0 +1,48 @@
+---
+- name: install resourcemanager pkgs
+  yum: name={{ item }}-{{ version['hadoop'] }} state=present
+  with_items:
+  - hadoop-yarn-resourcemanager
+  tags:
+  - cdh5-resourcemanager
+
+- name: install historyserver and  proxyserver pkgs
+  yum: name={{ item }}-{{ version['hadoop'] }} state=present
+  with_items:
+  - hadoop-mapreduce-historyserver
+  - hadoop-yarn-proxyserver
+  tags:
+  - cdh5-resourcemanager
+  - cdh5-historyserver
+  - cdh5-proxyserver
+
+- name: create the local storage directories for use by YARN
+  file: path={{ item }} state=directory owner=yarn group=yarn mode=0755
+  with_items: 
+  - "{{ yarn_nodemanager_local_dirs }}"
+  - "{{ yarn_nodemanager_log_dirs }}"
+  tags:
+  - cdh5-resourcemanager
+
+- name: create yarn history directory
+  shell: creates={{ item }} sudo -u hdfs hadoop fs -mkdir -p /user/history; sudo -u hdfs hadoop fs -chmod -R 1777 /user/history; sudo -u hdfs hadoop fs -chown mapred:hadoop /user/history && touch {{ item }}
+  with_items:  
+  - /var/hadoop/.status/yarn_history.created
+  tags:  
+  - cdh5-resourcemanager  
+  
+- name: create yarn log directory
+  shell: creates={{ item }} sudo -u hdfs hadoop fs -mkdir -p /var/log/hadoop-yarn; sudo -u hdfs hadoop fs -chown yarn:mapred /var/log/hadoop-yarn && touch {{ item }}
+  with_items:  
+  - /var/hadoop/.status/yarn_log.created
+  tags:  
+  - cdh5-resourcemanager
+
+- name: start resourcemanager services
+  service: name={{ item }} state=started
+  with_items:
+  - hadoop-yarn-resourcemanager
+  - hadoop-mapreduce-historyserver
+  - hadoop-yarn-proxyserver
+  tags:
+  - cdh5-resourcemanager

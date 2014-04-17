@@ -1,0 +1,181 @@
+<?xml version="1.0"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<configuration>
+  <!-- the logical name for nameservice -->
+  <property>
+    <name>dfs.nameservices</name>
+    <value>{{ nameservice_id }}</value>
+  </property>
+
+  <!-- Default block replication -->
+  <property>
+    <name>dfs.replication</name>
+    <value>{{ dfs_replication }}</value>
+  </property>
+
+  <!-- Determines where on the local filesystem the DFS name node should store the name table(fsimage) --> 
+  <property>
+    <name>dfs.namenode.name.dir</name>
+    <value>{{ dfs_namenode_name_dir | join(',') }}</value>
+  </property>
+  <!-- Determines where on the local filesystem an DFS data node should store its blocks -->
+  <property>
+    <name>dfs.datanode.data.dir</name>
+    <value>{{ dfs_datanode_data_dir | join(',') }}</value>
+  </property>
+
+  <!-- The name of the group of super-users -->
+  <property>
+    <name>dfs.permissions.superusergroup</name>
+    <value>{{ dfs_permissions_superusergroup }}</value>
+  </property>
+
+  <!-- turn off/on the permission checking -->
+  <property>
+    <name>dfs.permissions.enabled</name>
+    <value>{{ dfs_permissions_enabled }}</value>
+  </property>
+  
+  <!-- unique identifiers for each NameNode in the nameservice --> 
+  <property>
+    <name>dfs.ha.namenodes.{{ nameservice_id }}</name>
+    <value>{{ groups['cdh5-namenode'] | join(',') }}</value>
+  </property>
+  <!-- the fully-qualified RPC address for each NameNode to listen on -->
+  {% for host in groups['cdh5-namenode'] %}
+<property>
+    <name>dfs.namenode.rpc-address.{{ nameservice_id }}.{{ host }}</name>
+    <value>{{ host }}.{{ tl_domain }}:8020</value>
+  </property>
+  {% endfor %}
+<!-- the fully-qualified HTTP address for each NameNode to listen on -->
+  {% for host in groups['cdh5-namenode'] %}
+<property>
+    <name>dfs.namenode.http-address.{{ nameservice_id }}.{{ host }}</name>
+    <value>{{ host }}.{{ tl_domain }}:50070</value>
+  </property>
+  {% endfor %}
+ 
+  <!-- the location of the shared storage directory --> 
+  <property>
+    <name>dfs.namenode.shared.edits.dir</name>
+    <value>qjournal://{{ groups['cdh5-journalnode'] | join('.' ~ tl_domain + ':8485' + ';') }}.{{ tl_domain }}:8485/{{ nameservice_id }}</value>
+  </property>
+  <!-- the path where the JournalNode daemon will store its local state -->
+  <property>
+    <name>dfs.journalnode.edits.dir</name>
+    <value>{{ dfs_journalnode_edits_dir }}</value>
+  </property> 
+ 
+  <!-- the Java class that HDFS clients use to contact the Active NameNode --> 
+  <property>
+    <name>dfs.client.failover.proxy.provider.{{ nameservice_id }}</name>
+    <value>org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider</value>
+  </property>
+
+  <!-- run an arbitrary shell command to fence the Active NameNode -->
+  <property>
+    <name>dfs.ha.fencing.methods</name>
+    <value>shell(/bin/true)</value>
+  </property>
+
+  <!-- Automatic failover by the ZKFailoverController process --> 
+  <property>
+    <name>dfs.ha.automatic-failover.enabled</name>
+    <value>true</value>
+  </property>
+  <property>
+    <name>ha.zookeeper.quorum</name>
+    <value>{{ groups['cdh5-zookeeperserver'] | join('.' ~ tl_domain + ':2181' + ',') }}.{{ tl_domain }}:2181</value>
+  </property>
+
+  <!-- The default block size for new files, in bytes --> 
+  <property>
+    <name>dfs.blocksize</name>
+    <value>{{ dfs_blocksize }}</value>
+  </property>
+
+  <!-- The number of server threads for the namenode -->
+  <property>
+    <name>dfs.namenode.handler.count</name>
+    <value>{{ dfs_namenode_handler_count }}</value>
+  </property>
+  <!-- The number of server threads for the datanode -->
+  <property>
+    <name>dfs.datanode.handler.count</name>
+    <value>{{ dfs_datanode_handler_count }}</value>
+  </property> 
+
+  <!-- Reserved space in bytes per volume. Always leave this much space free for non dfs use -->
+  <property>
+    <name>dfs.datanode.du.reserved</name>
+    <value>{{ dfs_datanode_du_reserved }}</value>
+  </property>
+
+  <!-- Specifies the maximum amount of bandwidth that each datanode can utilize for the balancing purpose in term of the number of bytes per second -->
+  <property>
+    <name>dfs.balance.bandwidthPerSec</name>
+    <value>{{ dfs_balance_bandwidthPerSec }}</value>
+  </property>
+
+  <!-- Names a file that contains a list of hosts that are not permitted to connect to the namenode -->
+  <property>
+    <name>dfs.hosts.exclude</name>
+    <value>{{ dfs_hosts_exclude }}</value>
+  </property>
+
+  <!-- 	Specifies the maximum number of threads to use for transferring data in and out of the DN  -->
+  <property>
+    <name>dfs.datanode.max.transfer.threads</name>
+    <value>{{ dfs_datanode_max_transfer_threads }}</value>
+  </property>
+
+  <!-- configure storage balancing -->
+  <property>
+    <name>dfs.datanode.fsdataset.volume.choosing.policy</name>
+    <value>org.apache.hadoop.hdfs.server.datanode.fsdataset.AvailableSpaceVolumeChoosingPolicy</value>
+  </property>
+  <property>
+    <name>dfs.datanode.available-space-volume-choosing-policy.balanced-space-threshold</name>
+    <value>{{ dfs_datanode_balanced_space_threshold }}</value>
+  </property>
+  <property>
+    <name>dfs.datanode.available-space-volume-choosing-policy.balanced-space-preference-fraction</name>
+    <value>{{ dfs_datanode_balanced_space_preference_fraction }}</value>
+  </property>
+
+  <!-- A Hadoop HDFS DataNode has an upper bound on the number of files that it can serve at any one time -->
+  <property>
+    <name>dfs.datanode.max.xcievers</name>
+    <value>{{ dfs_datanode_max_xcievers }}</value>
+  </property>
+
+  <!-- enable webhdfs -->
+  <property>
+    <name>dfs.webhdfs.enabled</name>
+    <value>true</value>
+  </property>
+
+  <property>
+    <name>dfs.checksum.type</name>
+    <value>{{ dfs_checksum_type }}</value>
+  </property>
+
+</configuration>

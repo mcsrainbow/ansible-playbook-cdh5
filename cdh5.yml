@@ -1,0 +1,82 @@
+---
+- hosts: cdh5-all
+  roles:
+  - cdh5-base
+
+- hosts: cdh5-zookeeperserver
+  roles:
+  - cdh5-zookeeperserver
+
+- hosts: cdh5-journalnode
+  roles:
+  - cdh5-journalnode
+
+- hosts: cdh5-namenode-primary
+  roles:
+  - cdh5-namenode-primary
+
+- hosts: cdh5-namenode-backup
+  roles:
+  - cdh5-namenode-backup
+
+- hosts: cdh5-namenode-primary
+  tasks:
+  - name: start zkfc for namenodes
+    service: name=hadoop-hdfs-zkfc state=started
+    tags:
+    - cdh5-namenode-primary
+    - cdh5-namenode-primary-zkfc
+
+- hosts: cdh5-httpfs
+  roles:
+  - cdh5-httpfs
+
+- hosts: cdh5-slave
+  roles:
+  - cdh5-slave
+
+- hosts: cdh5-namenode-primary
+  tasks:
+  - name: create tmp directory
+    shell: creates={{ item }} sudo -u hdfs hadoop fs -mkdir -p /tmp; sudo -u hdfs hadoop fs -chmod -R 1777 /tmp && touch {{ item }}
+    with_items:
+    - /var/hadoop/.status/tmp_dir.created
+    tags:
+    - cdh5-namenode-primary
+    - cdh5-namenode-primary-tmpdir
+
+- hosts: cdh5-resourcemanager
+  roles:
+  - cdh5-resourcemanager
+
+- hosts: cdh5-hbase-master
+  roles:
+  - cdh5-hbase-master
+
+- hosts: cdh5-hbase-regionserver
+  roles:
+  - cdh5-hbase-regionserver
+
+- hosts: cdh5-hive
+  roles:
+  - cdh5-hive
+
+- hosts: cdh5-oozie
+  roles:
+  - cdh5-oozie
+
+- hosts: cdh5-pig
+  roles:
+  - cdh5-pig
+
+- hosts: cdh5-spark
+  roles:
+  - cdh5-spark-base
+
+- hosts: cdh5-spark-master
+  roles:
+  - cdh5-spark-master
+ 
+- hosts: cdh5-spark-worker
+  roles:
+  - cdh5-spark-worker

@@ -1,0 +1,38 @@
+---
+- name: install datanode nodemanager and mapreduce pkgs
+  yum: name={{ item }}-{{ version['hadoop'] }} state=present
+  with_items:
+  - hadoop-yarn-nodemanager
+  - hadoop-hdfs-datanode
+  - hadoop-mapreduce
+  tags:
+  - cdh5-slave
+
+- name: create the data directory for the slave nodes to store the data
+  file: path={{ item }} state=directory owner=hdfs group=hdfs mode=0700
+  with_items: 
+  - "{{ dfs_datanode_data_dir }}"
+  tags:
+  - cdh5-slave
+
+- name: create the local storage directories for use by YARN
+  file: path={{ item }} state=directory owner=yarn group=yarn mode=0755
+  with_items:
+  - "{{ yarn_nodemanager_local_dirs }}"
+  - "{{ yarn_nodemanager_log_dirs }}"
+  tags:
+  - cdh5-slave
+
+- name: start hadoop datanode service
+  service: name={{ item }} state=started
+  with_items:
+  - hadoop-hdfs-datanode
+  tags:
+  - cdh5-slave
+
+- name: start nodemanager services
+  service: name={{ item }} state=started
+  with_items:
+  - hadoop-yarn-nodemanager
+  tags:
+  - cdh5-slave

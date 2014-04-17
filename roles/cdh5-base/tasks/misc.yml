@@ -1,0 +1,17 @@
+---
+- name: install the libselinux-python package
+  yum: name=libselinux-python state=installed
+  tags:
+  - disable_selinux
+
+- name: disable SELinux in conf file
+  selinux: state=disabled
+  register: selinux_conf
+  tags:
+  - disable_selinux
+
+- name: disable SELinux in command line
+  shell: setenforce 0
+  when: selinux_conf|changed
+  tags:
+  - disable_selinux

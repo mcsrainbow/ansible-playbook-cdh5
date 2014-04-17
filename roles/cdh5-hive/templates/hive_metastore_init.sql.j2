@@ -1,0 +1,10 @@
+CREATE DATABASE IF NOT EXISTS metastore;
+USE metastore;
+SOURCE /usr/lib/hive/scripts/metastore/upgrade/mysql/hive-schema-0.12.0.mysql.sql;
+
+{% for host in hive_mysql_hosts %}
+CREATE USER 'hive'@'{{ host }}' IDENTIFIED BY '{{ hive_mysql_passwd }}';
+REVOKE ALL PRIVILEGES, GRANT OPTION FROM 'hive'@'{{ host }}';
+GRANT SELECT,INSERT,UPDATE,DELETE,LOCK TABLES,EXECUTE ON metastore.* TO 'hive'@'{{ host }}';
+{% endfor %}
+FLUSH PRIVILEGES;

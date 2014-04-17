@@ -1,0 +1,30 @@
+---
+- name: install hadoop-client for spark
+  yum: name={{ item }}-{{ version['hadoop']}} state=present
+  with_items:
+  - hadoop-client
+  tags:
+  - cdh5-spark-base
+
+- name: install spark pkgs
+  yum: name={{ item }}-{{ version['spark'] }} state=present
+  with_items:
+  - spark-core
+  - spark-master
+  - spark-worker
+  - spark-python
+  tags:
+  - cdh5-spark-base
+
+- name: copy spark configuration files
+  template: src={{ item }}.j2 dest=/etc/spark/conf/{{ item }} owner=spark group=spark mode=0644
+  with_items:
+  - fairscheduler.xml.template
+  - log4j.properties.template
+  - metrics.properties.template
+  - slaves
+  - spark-env.sh
+  - spark-env.sh.template
+  tags:
+  - cdh5-spark-base
+  - cdh5-spark-base-conf

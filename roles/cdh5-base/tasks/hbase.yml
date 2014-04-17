@@ -1,0 +1,43 @@
+---
+- name: install hbase base pkgs
+  yum: name={{ item }}-{{ version['hbase'] }} state=present
+  with_items:
+  - hbase
+  tags:
+  - cdh5-base
+  - cdh5-hbase
+
+- name: install ntp pkgs
+  yum: name=ntp state=present
+  tags:
+  - cdh5-base
+  - cdh5-hbase
+  - cdh5-ntp
+
+- name: start ntpd service
+  service: name=ntpd state=started
+  tags:
+  - cdh5-base
+  - cdh5-hbase
+  - cdh5-ntp
+
+- name: copy the limits.conf 
+  template: src=limits.conf.j2 dest=/etc/security/limits.conf owner=root group=root mode=0644
+  tags:
+  - cdh5-base
+  - cdh5-hbase
+
+- name: copy the hbase configuration files
+  template: src=hbase/{{ item }}.j2 dest=/etc/hbase/conf/{{ item }} owner=hbase group=hbase mode=0664
+  with_items:
+  - hbase-site.xml
+  - hbase-env.sh
+  - hadoop-metrics2-hbase.properties
+  - hbase-policy.xml
+  - log4j.properties
+  - regionservers
+  register: copy_hbase_conf
+  tags:
+  - cdh5-base
+  - cdh5-hbase
+  - cdh5-hbase-conf

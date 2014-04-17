@@ -1,0 +1,4 @@
+127.0.0.1 localhost localhost.localdomain
+{% for host in groups['cdh5-all'] %}
+{{ hostvars[host]["ansible_default_ipv4"]["address"] }} {{ host }}.{{ tl_domain }} {{ host }} {{ host }}.localdomain
+{% endfor %}

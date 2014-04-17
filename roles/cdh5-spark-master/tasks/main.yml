@@ -1,0 +1,7 @@
+---
+- name: start spark master services
+  service: name={{ item }} state=started
+  with_items:
+  - spark-master
+  tags:
+  - cdh5-spark-master

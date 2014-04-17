@@ -1,0 +1,7 @@
+[cloudera-gplextras5b2]
+# Packages for Cloudera's GPLExtras, Version 5.0.0b2, on RedHat or CentOS 6 x86_64
+name=Cloudera's GPLExtras, Version 5.0.0b2
+baseurl=http://archive.cloudera.com/gplextras5/redhat/6/x86_64/gplextras/5.0.0b2/
+gpgkey=http://archive.cloudera.com/gplextras5/redhat/6/x86_64/gplextras/RPM-GPG-KEY-cloudera    
+gpgcheck=1
+

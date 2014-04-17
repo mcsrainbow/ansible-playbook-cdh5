@@ -1,0 +1,136 @@
+---
+- name: install oozie pkgs
+  yum: name={{ item }}-{{ version['oozie'] }} state=present
+  with_items:
+  - oozie
+  - oozie-client
+  tags:
+  - cdh5-oozie
+
+- name: create alternatives for YARN without SSL
+  shell: creates=/etc/alternatives/oozie-tomcat-conf alternatives --install {{ item }} oozie-tomcat-conf {{ item }} 50; alternatives --set oozie-tomcat-conf {{ item }}
+  with_items:
+  - /etc/oozie/tomcat-conf.http
+  tags:
+  - cdh5-oozie
+  - cdh5-oozie-conf 
+
+- name: create the oozie configuration dirs
+  file: path=/etc/oozie/conf/{{ item }} state=directory owner=oozie group=oozie mode=0755
+  with_items:
+  - action-conf
+  - hadoop-conf
+  tags:
+  - cdh5-oozie
+  - cdh5-oozie-conf
+
+- name: copy the oozie configuration files
+  template: src={{ item }}.j2 dest=/etc/oozie/conf/{{ item }} owner=oozie group=oozie mode=0664
+  with_items:
+  - oozie-site.xml
+  - adminusers.txt
+  - hadoop-config.xml
+  - oozie-default.xml
+  - oozie-env.sh
+  - oozie-log4j.properties
+  - action-conf/hive.xml
+  - hadoop-conf/core-site.xml
+  register: copy_oozie_conf
+  tags:
+  - cdh5-oozie
+  - cdh5-oozie-conf
+
+- name: create needed directories for oozie
+  file: name={{ item }} state=directory owner=oozie group=oozie mode=0700
+  with_items:
+  - /var/oozie
+  - /var/oozie/deploy
+  - /var/oozie/status
+  tags:
+  - cdh5-oozie
+
+- name: copy the oozie_db_init.sql to /var/oozie/deploy
+  template: src={{ item }}.j2 dest=/var/oozie/deploy/{{ item }} owner=oozie group=oozie mode=0664
+  with_items:
+  - oozie_db_init.sql
+  tags:
+  - cdh5-oozie
+  - cdh5-oozie-conf
+
+- name: create database for oozie
+  shell: creates={{ item }} mysql -uroot -p'{{ hive_mysql_passwd }}' < /var/oozie/deploy/oozie_db_init.sql && touch {{ item }}
+  with_items:
+  - /var/oozie/status/oozie_db.created
+  tags:
+  - cdh5-oozie
+  - cdh5-oozie-db
+
+- name: download ext zip file from cloudera site
+  get_url: url=http://archive.cloudera.com/gplextras/misc/ext-2.2.zip dest=/var/oozie/deploy/ext-2.2.zip mode=0644
+  tags:
+  - cdh5-oozie
+  - cdh5-oozie-lib
+
+- name: extract the ext zip file to /var/lib/oozie
+  shell: creates=/var/lib/oozie/ext-2.2 unzip /var/oozie/deploy/ext-2.2.zip -d /var/lib/oozie/
+  tags:
+  - cdh5-oozie
+  - cdh5-oozie-lib
+
+- name: create directories in hdfs
+  shell: creates={{ item }} sudo -u hdfs hadoop fs -mkdir -p /user/oozie; sudo -u hdfs hadoop fs -chown -R oozie /user/oozie && touch {{ item }}
+  with_items:
+  - /var/oozie/status/oozie_dir.created
+  tags:
+  - cdh5-oozie
+  - cdh5-oozie-lib
+
+- name: create sharelib for oozie in hdfs
+  shell: creates={{ item }} sudo oozie-setup sharelib create -fs hdfs://{{ nameservice_id }}:8020 -locallib /usr/lib/oozie/oozie-sharelib-yarn.tar.gz && touch {{ item }}
+  with_items:
+  - /var/oozie/status/sharelib.created
+  tags:
+  - cdh5-oozie
+  - cdh5-oozie-lib
+
+- name: install mysql connector
+  yum: name={{ item }} state=present
+  with_items:
+  - mysql-connector-java
+  tags:
+  - cdh5-oozie
+  - cdh5-oozie-lib
+ 
+- name: create symbolically link for mysql connector
+  file: src=/usr/share/java/mysql-connector-java.jar dest=/var/lib/oozie/mysql-connector-java.jar owner=oozie group=oozie state=link
+  tags:
+  - cdh5-oozie
+  - cdh5-oozie-lib
+
+- name: create symbolically links for hadoop-lzo
+  file: src=/usr/lib/hadoop/lib/{{ item }} dest=/var/lib/oozie/{{ item }} owner=oozie group=oozie state=link
+  with_items:
+  - hadoop-lzo-0.4.15-gplextras5.0.0-beta-2-SNAPSHOT.jar
+  - hadoop-lzo.jar
+  tags:
+  - cdh5-oozie
+  - cdh5-oozie-lib
+  
+- name: create symbolically links for hadoop-lzo
+  file: src=/usr/lib/hadoop/lib/native/{{ item }} dest=/var/lib/oozie/{{ item }} owner=oozie group=oozie state=link
+  with_items:
+  - libgplcompression.a
+  - libgplcompression.la
+  - libgplcompression.lai
+  - libgplcompression.so
+  - libgplcompression.so.0
+  - libgplcompression.so.0.0.0
+  tags:
+  - cdh5-oozie
+  - cdh5-oozie-lib
+
+- name: start oozie
+  service: name=oozie state=started
+  tags:
+   - cdh5-oozie
+   - cdh5-oozie-service

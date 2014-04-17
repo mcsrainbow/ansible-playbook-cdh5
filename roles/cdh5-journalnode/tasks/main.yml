@@ -1,0 +1,17 @@
+---
+- name: install journalnode pkgs
+  yum: name={{ item }}-{{ version['hadoop'] }} state=present
+  with_items:
+  - hadoop-hdfs-journalnode
+  tags:
+  - cdh5-journalnode
+
+- name: create folder for journaling
+  file: path={{ dfs_journalnode_edits_dir }} state=directory owner=hdfs group=hdfs mode=0755
+  tags:
+  - cdh5-journalnode
+
+- name: start journalnode services
+  service: name=hadoop-hdfs-journalnode state=started
+  tags:
+  - cdh5-journalnode
