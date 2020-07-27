@@ -1,4 +1,4 @@
-ansible-playbooks-cdh5
+Ansible playbook for CDH5
 =========
 HDFS,HBase,Hive,HTTPFS,Oozie,Pig,Zookeeper,Spark <br />
 <br />
