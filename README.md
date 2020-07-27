@@ -1,4 +1,4 @@
-### Ansible playbook for CDH5
+### Ansible playbook of CDH5
 
 HDFS, HBase, Hive, HTTPFS, Oozie, Pig, Zookeeper, Spark
 
