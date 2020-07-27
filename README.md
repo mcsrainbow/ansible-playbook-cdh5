@@ -1,6 +1,6 @@
 ### Ansible playbook for CDH5
 
-#### HDFS, HBase, Hive, HTTPFS, Oozie, Pig, Zookeeper, Spark
+HDFS, HBase, Hive, HTTPFS, Oozie, Pig, Zookeeper, Spark
 
 #### Steps:
 
